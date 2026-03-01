@@ -38,7 +38,7 @@
     "better-sqlite3": "^12.6.2",
     "class-variance-authority": "^0.7.1",
     "dayjs": "^1.11.19",
-    "eslint": "^9.39.3",
+    "eslint": "^10.0.2",
     "lodash-es": "^4.17.23",
     "nuxt": "^4.3.1",
     "pinia": "^3.0.4",
