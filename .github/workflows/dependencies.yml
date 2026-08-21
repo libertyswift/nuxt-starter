@@ -1,0 +1,27 @@
+name: Dependency report
+
+on:
+  schedule:
+    # Каждый понедельник в 09:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  report:
+    name: Outdated packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Outdated (semver-совместимые)
+        run: npm outdated || true
+
+      - name: Available updates including majors
+        run: npx --yes npm-check-updates --color || true

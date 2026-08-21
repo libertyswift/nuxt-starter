@@ -5,55 +5,79 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  schedule:
-    # Run every Monday at 9:00 AM UTC
-    - cron: '0 9 * * 1'
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
 
 jobs:
-  dependencies:
+  quality:
+    name: Lint, typecheck, unit tests, build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+      - run: npm ci
 
-      - name: Check for security vulnerabilities
-        run: |
-          echo "🔒 Checking for security vulnerabilities..."
-          npm audit --audit-level=moderate || echo "⚠️ Security vulnerabilities found"
+      - name: Lint
+        run: npm run lint
 
-      - name: Check for outdated packages
-        run: |
-          echo "📦 Checking for outdated packages..."
-          npm outdated || true
+      - name: Typecheck
+        run: npm run typecheck
 
-      - name: Install npm-check-updates
-        run: npm install -g npm-check-updates
+      - name: Unit tests
+        run: npm run test:unit
 
-      - name: Check for ALL available updates (including major)
-        run: |
-          echo "🚀 Checking for ALL available updates (including major versions)..."
-          ncu --color || true
+      - name: Build
+        run: npm run build
 
-      - name: Check update details
-        run: |
-          echo "📊 Detailed update information..."
-          ncu -u --format group --color || true
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
 
-      - name: Show dependency tree
-        run: |
-          echo "🌳 Dependency tree (top level)..."
-          npm list --depth=0 || true
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
-      - name: Check peer dependencies
-        run: |
-          echo "🔗 Checking peer dependencies..."
-          npm list --depth=0 2>&1 | grep -i "peer" || echo "✅ No peer dependency issues"
+      - run: npm ci
+
+      - name: Install browsers
+        run: npx playwright install --with-deps
+
+      - name: Run E2E
+        run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: npm audit
+        run: npm audit --audit-level=high

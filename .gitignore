@@ -53,6 +53,8 @@ Thumbs.db
 .env.test.local
 .env.production.local
 !.env.example
+!.env.staging.example
+!.env.production.example
 
 # Testing
 coverage
@@ -99,9 +101,8 @@ temp/
 .pnp.*
 
 # Package managers
-package-lock.json
+# package-lock.json коммитим: без него `npm ci` в CI и Docker не работает
 yarn.lock
 pnpm-lock.yaml
 .pnpm-debug.log
 /.nuxtrc
-/.npmrc

@@ -1,35 +1,30 @@
-# Build stage
-FROM node:20-alpine AS builder
+# syntax=docker/dockerfile:1
+
+# ---------- build ----------
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Install dependencies
-RUN npm ci --legacy-peer-deps
-
-# Copy source code
 COPY . .
-
-# Build application
 RUN npm run build
 
-# Production stage
-FROM node:20-alpine
+# ---------- runtime ----------
+FROM node:24-alpine
 
 WORKDIR /app
 
-# Copy built application
-COPY --from=builder /app/.output /app/.output
+ENV NODE_ENV=production \
+    HOST=0.0.0.0 \
+    PORT=3000
 
-# Expose port
+# .output самодостаточен — node_modules в рантайме не нужны
+COPY --from=builder --chown=node:node /app/.output /app/.output
+
+USER node
+
 EXPOSE 3000
 
-# Set environment
-ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=3000
-
-# Start application
 CMD ["node", ".output/server/index.mjs"]
