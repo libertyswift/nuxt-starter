@@ -101,8 +101,10 @@ temp/
 .pnp.*
 
 # Package managers
-# package-lock.json коммитим: без него `npm ci` в CI и Docker не работает
+# pnpm-lock.yaml коммитим: без него `pnpm install --frozen-lockfile`
+# в CI и Docker не работает
+package-lock.json
 yarn.lock
-pnpm-lock.yaml
 .pnpm-debug.log
+.pnpm-store
 /.nuxtrc

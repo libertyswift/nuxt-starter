@@ -20,38 +20,39 @@
 
 ## Быстрый старт
 
-Нужен Node.js 22+ (в CI и Docker — 24).
+Нужен Node.js 22+ (в CI и Docker — 24) и pnpm. Версия pnpm зафиксирована в
+поле `packageManager`, так что достаточно `corepack enable`.
 
 ```bash
 git clone git@github.com:libertyswift/nuxt-starter.git
 cd nuxt-starter
-npm install
+pnpm install
 cp .env.example .env
-npm run dev            # http://localhost:3000
+pnpm dev            # http://localhost:3000
 ```
 
 ## Команды
 
 ```bash
-npm run dev              # dev-сервер
-npm run dev:staging      # dev-сервер с .env.staging
-npm run build            # прод-сборка
-npm run build:staging    # сборка с .env.staging
-npm run build:production # сборка с .env.production
-npm run preview          # предпросмотр прод-сборки
-npm run generate         # статическая генерация
+pnpm dev              # dev-сервер
+pnpm dev:staging      # dev-сервер с .env.staging
+pnpm build            # прод-сборка
+pnpm build:staging    # сборка с .env.staging
+pnpm build:production # сборка с .env.production
+pnpm preview          # предпросмотр прод-сборки
+pnpm generate         # статическая генерация
 
-npm run lint             # eslint
-npm run lint:fix         # eslint --fix
-npm run format           # prettier
-npm run typecheck        # vue-tsc через nuxt typecheck
-npm run design:check     # токены tailwind.css соответствуют DESIGN.md
+pnpm lint             # eslint
+pnpm lint:fix         # eslint --fix
+pnpm format           # prettier
+pnpm typecheck        # vue-tsc через nuxt typecheck
+pnpm design:check     # токены tailwind.css соответствуют DESIGN.md
 
-npm run test             # vitest в watch-режиме
-npm run test:unit        # vitest один прогон
-npm run test:coverage    # покрытие
-npm run test:e2e         # playwright
-npm run test:e2e:ui      # playwright в UI-режиме
+pnpm test             # vitest в watch-режиме
+pnpm test:unit        # vitest один прогон
+pnpm test:coverage    # покрытие
+pnpm test:e2e         # playwright
+pnpm test:e2e:ui      # playwright в UI-режиме
 ```
 
 ## Структура
@@ -101,7 +102,7 @@ test/e2e/                     # Playwright
 
 ```bash
 cp .env.staging.example .env.staging
-npm run build:staging
+pnpm build:staging
 ```
 
 ## Дизайн-система
@@ -110,7 +111,7 @@ npm run build:staging
 `.dark` в `app/assets/css/tailwind.css` производны от него.
 
 Рабочий цикл: правите `DESIGN.md` → просите агента привести проект в
-соответствие → `npm run design:check` подтверждает, что CSS не разъехался.
+соответствие → `pnpm design:check` подтверждает, что CSS не разъехался.
 Проверка падает при расхождении в любую сторону, в том числе если в CSS
 появился токен, не описанный в `DESIGN.md`. В CI она включена.
 
@@ -121,7 +122,7 @@ npm run build:staging
 ## Компоненты shadcn-vue
 
 ```bash
-npx shadcn-vue@latest add card
+pnpm dlx shadcn-vue@latest add card
 ```
 
 Компоненты попадают в `app/components/ui/` и подключаются авто-импортом.
@@ -158,11 +159,27 @@ unit-тесты, сборку, e2e и `npm audit`.
 `.github/workflows/dependencies.yml` раз в неделю печатает отчёт об
 обновлениях; сами обновления приносит Dependabot.
 
+## Пакетный менеджер
+
+Проект на pnpm. Настройки лежат в `pnpm-workspace.yaml`, а **не** в поле `pnpm`
+внутри `package.json` — в pnpm 10+ второй вариант молча игнорируется:
+
+- `overrides` — фиксация пропатченных версий `sharp` и `esbuild`;
+- `allowBuilds` — какие пакеты вправе выполнять install-скрипты. По умолчанию
+  pnpm блокирует их все, это защита от supply-chain атак. Новый пакет со
+  скриптом установки попадёт сюда как `set this to true or false` — решение
+  принимаете вы;
+- `minimumReleaseAgeExclude` — pnpm не ставит пакеты, опубликованные совсем
+  недавно; список пополняется автоматически при обновлении зависимостей.
+
 ## Известные ограничения
 
 - **zod зафиксирован на 3.25.** `@vee-validate/zod` требует zod 3. Как только
   выйдет стабильная vee-validate 5, обёртка `toTypedSchema` уйдёт (схема
   передаётся напрямую через Standard Schema) и можно будет перейти на zod 4.
+- **TypeScript закреплён на 6.0.x.** Вышел TypeScript 7 (нативный порт), но
+  `typescript-eslint` объявляет поддержку `>=4.8.4 <6.1.0`. Поднимать только
+  вместе с ним.
 - **`strategy: 'no_prefix'`** держит один URL на все языки, поэтому
   `@nuxtjs/seo` не сгенерирует hreflang и локализованный sitemap. Если
   языковые версии нужны в поиске — переключите на `prefix_except_default`.

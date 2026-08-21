@@ -11,22 +11,22 @@ Nuxt 4 directory layout with the `app/` folder.
 ## Commands
 
 ```bash
-npm run dev          # dev server on http://localhost:3000
-npm run build        # production build
-npm run preview      # preview the production build
+pnpm dev          # dev server on http://localhost:3000
+pnpm build        # production build
+pnpm preview      # preview the production build
 
-npm run lint         # eslint
-npm run lint:fix     # eslint --fix
-npm run format       # prettier
-npm run typecheck    # vue-tsc via `nuxt typecheck`
-npm run design:check # tailwind.css tokens match DESIGN.md
+pnpm lint         # eslint
+pnpm lint:fix     # eslint --fix
+pnpm format       # prettier
+pnpm typecheck    # vue-tsc via `nuxt typecheck`
+pnpm design:check # tailwind.css tokens match DESIGN.md
 
-npm run test:unit    # vitest, single run
-npm run test:e2e     # playwright
+pnpm test:unit    # vitest, single run
+pnpm test:e2e     # playwright
 ```
 
-Before declaring work done, run `npm run lint`, `npm run typecheck`,
-`npm run design:check` and `npm run test:unit` — CI runs all four plus the
+Before declaring work done, run `pnpm lint`, `pnpm typecheck`,
+`pnpm design:check` and `pnpm test:unit` — CI runs all four plus the
 build and e2e.
 
 ## Architecture
@@ -56,7 +56,7 @@ not error — they simply produce no CSS. Watch for them when porting snippets.
 
 ### shadcn-vue
 
-Add components with `npx shadcn-vue@latest add <name>`; they land in
+Add components with `pnpm dlx shadcn-vue@latest add <name>`; they land in
 `app/components/ui/` and are auto-imported. That directory is excluded from
 eslint — change components through the CLI, not by hand.
 
@@ -83,7 +83,7 @@ When the user edits `DESIGN.md` and asks to apply it:
 1. Update the token blocks in `app/assets/css/tailwind.css` to match exactly.
 2. Apply the prose rules — typography goes into `@theme` as `--font-*`,
    component rules into the components themselves.
-3. Run `npm run design:check`. It fails on any mismatch in either direction,
+3. Run `pnpm design:check`. It fails on any mismatch in either direction,
    including a token present in CSS but undocumented in `DESIGN.md`. CI runs it.
 
 Never edit tokens in the CSS directly — that inverts the contract and the check
@@ -132,12 +132,32 @@ add one only when a concrete feature needs it.
   zod 4, but shadcn-vue's form components are built on vee-validate — swapping
   loses `<FormField>`. Wait for vee-validate 5 instead.
 
+## Package manager
+
+pnpm, version pinned in `packageManager`. Never run `npm install` here — it
+would create a second lockfile and silently ignore the settings below.
+
+pnpm settings live in `pnpm-workspace.yaml`, **not** in a `pnpm` field in
+`package.json` — pnpm 10+ ignores the latter without warning, which is how the
+`sharp` / `esbuild` overrides stopped applying during the migration.
+
+`allowBuilds` lists packages permitted to run install scripts; everything else
+is blocked by default. When a new dependency needs one, pnpm writes
+`set this to true or false` into that map and the install warns — decide
+explicitly rather than blanket-allowing.
+
+Do not add `shamefully-hoist` or `node-linker=hoisted`. If a package is not
+resolvable, it is an undeclared dependency — declare it. That is how the
+missing `typescript` dependency surfaced.
+
 ## Constraints
 
+- **TypeScript is pinned to 6.0.x.** TypeScript 7 (the native port) is out, but
+  `typescript-eslint` declares support for `>=4.8.4 <6.1.0`. Bump both together.
 - **zod stays on 3.x.** `@vee-validate/zod` peer-requires zod 3. Move to zod 4
   only together with vee-validate 5, which drops `toTypedSchema` in favour of
   Standard Schema.
-- `package-lock.json` is committed — `npm ci` in CI and Docker depends on it.
+- `package-lock.json` is committed — `pnpm install --frozen-lockfile` in CI and Docker depends on it.
 - Do not add `legacy-peer-deps`; it previously masked the zod conflict above.
 - `overrides` in `package.json` pin `sharp` and `esbuild` to patched versions;
   drop an entry only once the upstream dependency ships the fix.

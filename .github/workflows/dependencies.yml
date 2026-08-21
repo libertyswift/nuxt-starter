@@ -13,15 +13,17 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
-          cache: 'npm'
+          cache: 'pnpm'
 
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
 
       - name: Outdated (semver-совместимые)
-        run: npm outdated || true
+        run: pnpm outdated || true
 
       - name: Available updates including majors
-        run: npx --yes npm-check-updates --color || true
+        run: pnpm dlx npm-check-updates --color || true
