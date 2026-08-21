@@ -18,6 +18,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "typecheck": "nuxt typecheck",
+    "design:check": "node scripts/check-design-tokens.mjs",
     "test": "vitest",
     "test:unit": "vitest run",
     "test:watch": "vitest watch",

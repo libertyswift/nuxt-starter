@@ -45,6 +45,7 @@ npm run lint             # eslint
 npm run lint:fix         # eslint --fix
 npm run format           # prettier
 npm run typecheck        # vue-tsc через nuxt typecheck
+npm run design:check     # токены tailwind.css соответствуют DESIGN.md
 
 npm run test             # vitest в watch-режиме
 npm run test:unit        # vitest один прогон
@@ -102,6 +103,20 @@ test/e2e/                     # Playwright
 cp .env.staging.example .env.staging
 npm run build:staging
 ```
+
+## Дизайн-система
+
+`DESIGN.md` в корне — источник правды по дизайну проекта. Блоки `:root` и
+`.dark` в `app/assets/css/tailwind.css` производны от него.
+
+Рабочий цикл: правите `DESIGN.md` → просите агента привести проект в
+соответствие → `npm run design:check` подтверждает, что CSS не разъехался.
+Проверка падает при расхождении в любую сторону, в том числе если в CSS
+появился токен, не описанный в `DESIGN.md`. В CI она включена.
+
+Формат опирается на [DESIGN.md от Google Labs](https://blog.google/innovation-and-ai/models-and-research/google-labs/stitch-design-md/),
+но токены записаны как CSS custom properties, а не DTCG: так значения
+совпадают с `tailwind.css` один в один и проверяются автоматически.
 
 ## Компоненты shadcn-vue
 

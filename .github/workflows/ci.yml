@@ -34,6 +34,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Токены соответствуют DESIGN.md
+        run: npm run design:check
+
       - name: Unit tests
         run: npm run test:unit
 

@@ -19,13 +19,15 @@ npm run lint         # eslint
 npm run lint:fix     # eslint --fix
 npm run format       # prettier
 npm run typecheck    # vue-tsc via `nuxt typecheck`
+npm run design:check # tailwind.css tokens match DESIGN.md
 
 npm run test:unit    # vitest, single run
 npm run test:e2e     # playwright
 ```
 
-Before declaring work done, run `npm run lint`, `npm run typecheck` and
-`npm run test:unit` — CI runs all three plus the build and e2e.
+Before declaring work done, run `npm run lint`, `npm run typecheck`,
+`npm run design:check` and `npm run test:unit` — CI runs all four plus the
+build and e2e.
 
 ## Architecture
 
@@ -70,6 +72,26 @@ injects the anti-FOUC script. Toggle by assigning `colorMode.preference` —
 
 Note that `useColorMode` also exists in VueUse; the auto-import resolves to
 `@nuxtjs/color-mode`, which has a different API.
+
+### Design system: DESIGN.md is the source of truth
+
+`DESIGN.md` in the repo root owns the design of the project. The `:root` /
+`.dark` blocks in `app/assets/css/tailwind.css` are **derived** from it.
+
+When the user edits `DESIGN.md` and asks to apply it:
+
+1. Update the token blocks in `app/assets/css/tailwind.css` to match exactly.
+2. Apply the prose rules — typography goes into `@theme` as `--font-*`,
+   component rules into the components themselves.
+3. Run `npm run design:check`. It fails on any mismatch in either direction,
+   including a token present in CSS but undocumented in `DESIGN.md`. CI runs it.
+
+Never edit tokens in the CSS directly — that inverts the contract and the check
+will fail. Change `DESIGN.md`, then propagate.
+
+Component-level deviations from stock shadcn-vue must be recorded in the
+"Отклонения от стоковых компонентов" section of `DESIGN.md`, otherwise the next
+`shadcn-vue add` silently reverts them.
 
 ### Configuration
 
