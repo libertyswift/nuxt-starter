@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Nuxt 4 starter kit: shadcn-vue on Tailwind CSS 4, i18n (ru/en), Pinia, TanStack
-vue-query, vee-validate + zod, `@nuxtjs/seo`, Vitest and Playwright. TypeScript
-throughout, Nuxt 4 directory layout with the `app/` folder.
+Nuxt 4 starter kit: shadcn-vue on Tailwind CSS 4, i18n (ru/en), Pinia,
+vee-validate + zod, `@nuxtjs/seo`, Vitest and Playwright. TypeScript throughout,
+Nuxt 4 directory layout with the `app/` folder.
 
 ## Commands
 
@@ -88,6 +88,27 @@ E2E targets `data-testid`, never UI text (it is translated). Interactions that
 depend on hydration must be written idempotently and wrapped in
 `expect(...).toPass()` — the SSR markup is clickable before Vue attaches
 handlers.
+
+## Deliberately absent
+
+These were considered and left out on purpose. Do not add them speculatively —
+add one only when a concrete feature needs it.
+
+- **Data fetching layer.** Use Nuxt's `useAsyncData` / `useFetch`. TanStack
+  vue-query was removed: nothing used it, it cost ~8 kB gzip, and `useQuery`
+  renders nothing during SSR unless every call site remembers
+  `await suspense()`. Reach for it only in mutation-heavy, app-like screens
+  (invalidation graphs, optimistic updates, infinite lists) — and prefer
+  scoping it to a client-rendered section via
+  `routeRules: { '/admin/**': { ssr: false } }`, where its SSR caveat is moot.
+- **Tables.** When one is needed: `@tanstack/vue-table` v9, following the
+  shadcn-vue data-table guide.
+- **Long lists.** `@tanstack/vue-virtual`.
+- **TanStack Store / Router / Start.** Pinia already covers the first; the
+  other two replace Nuxt rather than complement it.
+- **TanStack Form.** It is schema-agnostic (Standard Schema) and would allow
+  zod 4, but shadcn-vue's form components are built on vee-validate — swapping
+  loses `<FormField>`. Wait for vee-validate 5 instead.
 
 ## Constraints
 

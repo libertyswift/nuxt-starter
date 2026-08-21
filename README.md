@@ -1,6 +1,6 @@
 # Nuxt Starter
 
-Стартер на Nuxt 4: shadcn-vue, Tailwind CSS 4, i18n, Pinia, vue-query, тесты и Docker.
+Стартер на Nuxt 4: shadcn-vue, Tailwind CSS 4, i18n, Pinia, тесты и Docker.
 
 ## Стек
 
@@ -13,7 +13,7 @@
 | Тема        | `@nuxtjs/color-mode` (класс `dark` на `<html>`, без FOUC)     |
 | Локализация | `@nuxtjs/i18n`, ru (по умолчанию) и en, стратегия `no_prefix` |
 | Состояние   | Pinia + `pinia-plugin-persistedstate`                         |
-| Данные      | `@tanstack/vue-query` поверх `$fetch`                         |
+| Данные      | встроенные `useAsyncData` / `useFetch` и `$fetch`             |
 | Формы       | vee-validate + zod                                            |
 | SEO         | `@nuxtjs/seo` (sitemap, robots, og-image, canonical)          |
 | Тесты       | Vitest в окружении Nuxt, Playwright для e2e                   |
@@ -63,11 +63,10 @@ app/
 │   ├── forms/
 │   ├── AppHeader.vue
 │   └── LanguageSwitcher.vue
-├── composables/              # useApi, useForm, useSeo, useDate, useToast
+├── composables/              # useForm, useSeo, useDate, useToast
 ├── layouts/
 ├── lib/                      # cn() и zod-схемы
 ├── pages/
-├── plugins/                  # vue-query с SSR-гидратацией
 ├── stores/                   # Pinia
 └── utils/                    # хелперы поверх es-toolkit
 
