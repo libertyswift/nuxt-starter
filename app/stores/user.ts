@@ -41,30 +41,16 @@ export const useUserStore = defineStore('user', {
       this.error = null
     },
 
-    setLoading(loading: boolean) {
-      this.isLoading = loading
-    },
-
     setError(error: string) {
       this.error = error
       this.isLoading = false
     },
 
-    async fetchUser() {
-      this.setLoading(true)
-      try {
-        // Example API call
-        const response = await $fetch<{ user: User }>('/api/auth/session')
-        this.setUser(response.user)
-      } catch (error) {
-        this.setError('Failed to fetch user')
-      } finally {
-        this.setLoading(false)
-      }
+    setLoading(loading: boolean) {
+      this.isLoading = loading
     }
   },
 
-  persist: {
-    storage: persistedState.localStorage
-  }
+  // pinia-plugin-persistedstate: по умолчанию localStorage
+  persist: true
 })

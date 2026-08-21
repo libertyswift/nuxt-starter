@@ -1,15 +1,20 @@
 import { useForm as useVeeForm } from 'vee-validate'
+import type { FormOptions, GenericObject } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import type { ZodSchema } from 'zod'
 
-export const useForm = <T extends Record<string, any>>(
+/**
+ * useForm поверх vee-validate с zod-схемой.
+ *
+ * После выхода vee-validate 5 обёртка toTypedSchema уйдёт:
+ * zod-схему можно будет передавать напрямую через Standard Schema.
+ */
+export const useForm = <T extends GenericObject>(
   schema: ZodSchema<T>,
-  initialValues?: Partial<T>
+  options?: Omit<FormOptions<T>, 'validationSchema'>
 ) => {
-  const form = useVeeForm({
-    validationSchema: toTypedSchema(schema),
-    initialValues: initialValues as any
+  return useVeeForm<T>({
+    ...options,
+    validationSchema: toTypedSchema(schema)
   })
-
-  return form
 }

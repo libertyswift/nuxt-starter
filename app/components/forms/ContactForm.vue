@@ -33,7 +33,7 @@ const onSubmit = handleSubmit(async (values) => {
 </script>
 
 <template>
-  <form @submit.prevent="onSubmit" class="space-y-6">
+  <form class="space-y-6" @submit.prevent="onSubmit">
     <div v-if="success" class="p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-md">
       Message sent successfully!
     </div>

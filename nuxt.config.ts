@@ -1,6 +1,8 @@
+import tailwindcss from '@tailwindcss/vite'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: '2026-08-21',
   devtools: { enabled: true },
 
   modules: [
@@ -10,24 +12,29 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxt/scripts',
-    '@nuxt/test-utils',
-    '@nuxt/content',
+    '@nuxt/test-utils/module',
+    '@nuxtjs/color-mode',
     '@nuxtjs/i18n',
-    '@nuxtjs/tailwindcss',
-    'shadcn-nuxt',
-    '@vueuse/nuxt',
+    '@nuxtjs/seo',
     '@pinia/nuxt',
-    '@nuxtjs/seo'
+    'pinia-plugin-persistedstate/nuxt',
+    'shadcn-nuxt',
+    '@vueuse/nuxt'
   ],
 
+  css: ['~/assets/css/tailwind.css'],
+
+  vite: {
+    plugins: [tailwindcss()]
+  },
+
   i18n: {
-    vueI18n: './i18n/i18n.config.ts',
+    // i18n/i18n.config.ts и i18n/locales/ подхватываются по умолчанию
     defaultLocale: 'ru',
     locales: [
-      { code: 'en', name: 'English', file: 'en.ts' },
-      { code: 'ru', name: 'Русский', file: 'ru.ts' }
+      { code: 'en', name: 'English', language: 'en-US', file: 'en.ts' },
+      { code: 'ru', name: 'Русский', language: 'ru-RU', file: 'ru.ts' }
     ],
-    langDir: 'locales',
     strategy: 'no_prefix'
   },
 
@@ -36,46 +43,44 @@ export default defineNuxtConfig({
     componentDir: './app/components/ui'
   },
 
-  css: ['~/assets/css/tailwind.css'],
-
-  alias: {
-    '@': './app'
+  icon: {
+    // Иконки берём из локального @iconify-json/lucide и вшиваем в бандл:
+    // без запросов к Iconify API в рантайме.
+    serverBundle: { collections: ['lucide'] },
+    clientBundle: { scan: true }
   },
 
+  // @nuxtjs/color-mode ставит класс `dark` на <html> и отдаёт anti-FOUC скрипт,
+  // поэтому руками класс переключать не нужно.
   colorMode: {
-    classSuffix: ''
+    classSuffix: '',
+    preference: 'system',
+    fallback: 'light'
   },
 
+  // URL задаётся через NUXT_PUBLIC_SITE_URL, см. .env.example
   site: {
-    url: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     name: 'Nuxt Starter',
-    description: 'A modern Nuxt 3 starter with shadcn-vue, Tailwind CSS, and more',
+    description: 'Современный стартер на Nuxt 4 с shadcn-vue, Tailwind CSS и i18n',
     defaultLocale: 'ru'
   },
 
-  seo: {
-    enabled: true
-  },
-
   runtimeConfig: {
-    // Private keys (только на сервере)
-    // Секреты берём из .env
-    // apiSecret: process.env.API_SECRET,
-    // githubClientSecret: process.env.GITHUB_CLIENT_SECRET,
+    // Приватные ключи — только на сервере.
+    // Переопределяются переменными NUXT_* на рантайме.
+    // apiSecret: '',
 
     public: {
-      // Публичные переменные (доступны на клиенте и сервере)
-      // Берём из config/environments.ts с возможностью переопределения через .env
-      ...(() => {
-        const { getConfig } = require('./config/environments')
-        const config = getConfig()
-        return {
-          apiBaseUrl: config.apiBaseUrl,
-          siteUrl: config.siteUrl,
-          environment: process.env.APP_ENV || 'local',
-          features: config.features
-        }
-      })()
+      // Переопределяются переменными NUXT_PUBLIC_* на рантайме,
+      // без пересборки: NUXT_PUBLIC_API_BASE_URL, NUXT_PUBLIC_SITE_URL и т.д.
+      siteUrl: 'http://localhost:3000',
+      apiBaseUrl: 'https://jsonplaceholder.typicode.com',
+      environment: 'local',
+      features: {
+        analytics: false,
+        sentry: false,
+        debugMode: true
+      }
     }
   }
 })

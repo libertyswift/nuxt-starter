@@ -1,16 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import type { UseMutationOptions, UseQueryOptions } from '@tanstack/vue-query'
+import type { QueryKey, UseMutationOptions, UseQueryOptions } from '@tanstack/vue-query'
+import type { MaybeRef } from 'vue'
 
-interface ApiError {
+export interface ApiError {
   message: string
   statusCode?: number
 }
 
+/**
+ * Тонкая обёртка над vue-query с типом ошибки проекта.
+ *
+ * Ключ передавай реактивным (ref/computed) там, где он зависит от состояния,
+ * иначе запрос не перезапросится при его изменении.
+ */
 export const useApi = () => {
   const queryClient = useQueryClient()
 
   const createQuery = <TData = unknown, TError = ApiError>(
-    key: string[],
+    key: MaybeRef<QueryKey>,
     fetcher: () => Promise<TData>,
     options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>
   ) => {
@@ -36,78 +43,4 @@ export const useApi = () => {
     createMutation,
     queryClient
   }
-}
-
-// Example API composables
-export const useUsers = () => {
-  const { createQuery } = useApi()
-
-  return createQuery(
-    ['users'],
-    () => $fetch('/api/users')
-  )
-}
-
-export const useUser = (id: MaybeRef<string>) => {
-  const { createQuery } = useApi()
-  const userId = computed(() => unref(id))
-
-  return createQuery(
-    ['user', userId.value],
-    () => $fetch(`/api/users/${userId.value}`),
-    {
-      enabled: computed(() => !!userId.value)
-    }
-  )
-}
-
-export const useCreateUser = () => {
-  const { createMutation, queryClient } = useApi()
-
-  return createMutation(
-    (userData: { name: string; email: string }) =>
-      $fetch('/api/users', {
-        method: 'POST',
-        body: userData
-      }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['users'] })
-      }
-    }
-  )
-}
-
-export const useUpdateUser = () => {
-  const { createMutation, queryClient } = useApi()
-
-  return createMutation(
-    ({ id, data }: { id: string; data: Partial<{ name: string; email: string }> }) =>
-      $fetch(`/api/users/${id}`, {
-        method: 'PATCH',
-        body: data
-      }),
-    {
-      onSuccess: (_, variables) => {
-        queryClient.invalidateQueries({ queryKey: ['users'] })
-        queryClient.invalidateQueries({ queryKey: ['user', variables.id] })
-      }
-    }
-  )
-}
-
-export const useDeleteUser = () => {
-  const { createMutation, queryClient } = useApi()
-
-  return createMutation(
-    (id: string) =>
-      $fetch(`/api/users/${id}`, {
-        method: 'DELETE'
-      }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['users'] })
-      }
-    }
-  )
 }

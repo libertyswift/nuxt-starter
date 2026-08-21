@@ -1,6 +1,6 @@
-import { debounce, throttle, chunk, uniq, groupBy, orderBy } from 'lodash-es'
+import { debounce, throttle, chunk, uniq, groupBy, orderBy } from 'es-toolkit'
 
-// Re-export commonly used lodash functions
+// Re-export commonly used es-toolkit helpers
 export { debounce, throttle, chunk, uniq, groupBy, orderBy }
 
 // Custom utility functions
