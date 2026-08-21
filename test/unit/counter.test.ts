@@ -1,12 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { setActivePinia, createPinia } from 'pinia'
+import { describe, it, expect } from 'vitest'
 import { useCounterStore } from '~/stores/counter'
 
 describe('Counter Store', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia())
-  })
-
   it('initializes with count 0', () => {
     const counter = useCounterStore()
     expect(counter.count).toBe(0)

@@ -1,22 +1,7 @@
-import { beforeEach, vi } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+import { beforeEach } from 'vitest'
 
-// Mock Nuxt composables
+// Свежая Pinia на каждый тест — сторы не протекают между кейсами.
 beforeEach(() => {
-  vi.mock('#app', () => ({
-    useState: vi.fn((key, init) => {
-      const state = ref(init?.())
-      return state
-    }),
-    useRuntimeConfig: vi.fn(() => ({
-      public: {
-        siteUrl: 'http://localhost:3000'
-      }
-    })),
-    useRoute: vi.fn(() => ({
-      path: '/',
-      params: {},
-      query: {}
-    })),
-    navigateTo: vi.fn()
-  }))
+  setActivePinia(createPinia())
 })

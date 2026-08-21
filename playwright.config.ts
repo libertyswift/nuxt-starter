@@ -6,7 +6,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  reporter: process.env.CI ? [['html'], ['github']] : 'html',
 
   use: {
     baseURL: 'http://localhost:3000',
@@ -30,7 +30,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev',
+    // В CI гоняем прод-сборку — она ближе к реальности и стартует быстрее dev
+    command: process.env.CI ? 'npm run build && npm run preview' : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI
   }
